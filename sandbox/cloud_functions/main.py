@@ -3,7 +3,7 @@ Wrapper to run mypy on Cloud Functions.
 
 This module should be able to run on Python 3.8 and later.
 """
-
+import os
 import subprocess
 import sys
 import tempfile
@@ -37,8 +37,13 @@ def run_mypy(source: str, options: List[str]) -> Dict[str, Union[int, str]]:
     with tempfile.NamedTemporaryFile(mode="w") as f:
         f.write(source)
         f.flush()
+        env = os.environ.copy()
+        env["MYPY_FORCE_TERMINAL_WIDTH"] = "200"
+
         process = subprocess.run(
-            [sys.executable, "-m", "mypy"] + options + [f.name], capture_output=True
+            [sys.executable, "-m", "mypy"] + options + [f.name],
+            capture_output=True,
+            env=env,
         )
         return {
             "exit_code": process.returncode,
